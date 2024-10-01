@@ -10,6 +10,9 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# set(CMAKE_PREFIX_PATH "~/prefix")
+list(APPEND CMAKE_PREFIX_PATH "~/prefix/eigen3.3")
+
 set(CMAKE_CXX_STANDARD 11)
 
 # Set compiler specific settings (FixMe: Should not cmake do this for us automatically?)
@@ -32,7 +35,7 @@ ENDIF()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
 # Find Eigen 3 (dependency)
-find_package(Eigen3 3.3.0 REQUIRED)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 # Define interface library target
 add_library(sophus INTERFACE)

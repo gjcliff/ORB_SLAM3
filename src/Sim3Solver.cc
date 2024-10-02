@@ -124,7 +124,7 @@ void Sim3Solver::SetRansacParameters(double probability, int minInliers, int max
 {
     mRansacProb = probability;
     mRansacMinInliers = minInliers;
-    mRansacMaxIts = maxIterations;    
+    mRansacMaxIts = maxIterations;
 
     N = mvpMapPoints1.size(); // number of correspondences
 
@@ -308,7 +308,7 @@ void Sim3Solver::ComputeCentroid(Eigen::Matrix3f &P, Eigen::Matrix3f &Pr, Eigen:
 }
 
 
-void Sim3Solver::ComputeSim3(Eigen::Matrix3f &P1, Eigen::Matrix3f &P2)
+bool Sim3Solver::ComputeSim3(Eigen::Matrix3f &P1, Eigen::Matrix3f &P2)
 {
     // Custom implementation of:
     // Horn 1987, Closed-form solution of absolute orientataion using unit quaternions
@@ -361,6 +361,12 @@ void Sim3Solver::ComputeSim3(Eigen::Matrix3f &P1, Eigen::Matrix3f &P2)
 
     Eigen::Vector3f vec = evec.block<3,1>(1,maxIndex); //extract imaginary part of the quaternion (sin*axis)
 
+    // https://github.com/DavidPetkovsek/MORB_SLAM/issues/17
+    std::cout << "vec.norm(): " << vec.norm() << std::endl;
+    if (vec.norm() == 0) {
+        return false;
+    }
+
     // Rotation angle. sin is the norm of the imaginary part, cos is the real part
     double ang=atan2(vec.norm(),evec(0,maxIndex));
 
@@ -409,6 +415,8 @@ void Sim3Solver::ComputeSim3(Eigen::Matrix3f &P1, Eigen::Matrix3f &P2)
 
     Eigen::Vector3f tinv = -sRinv * mt12i;
     mT21i.block<3,1>(0,3) = tinv;
+
+    return true; // https://github.com/DavidPetkovsek/MORB_SLAM/issues/17
 }
 
 

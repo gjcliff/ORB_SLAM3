@@ -362,7 +362,6 @@ bool Sim3Solver::ComputeSim3(Eigen::Matrix3f &P1, Eigen::Matrix3f &P2)
     Eigen::Vector3f vec = evec.block<3,1>(1,maxIndex); //extract imaginary part of the quaternion (sin*axis)
 
     // https://github.com/DavidPetkovsek/MORB_SLAM/issues/17
-    std::cout << "vec.norm(): " << vec.norm() << std::endl;
     if (vec.norm() == 0) {
         return false;
     }

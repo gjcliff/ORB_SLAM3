@@ -571,28 +571,44 @@ void MapPoint::UpdateMap(Map* pMap)
 
 void MapPoint::PreSave(set<KeyFrame*>& spKF,set<MapPoint*>& spMP)
 {
+    unique_lock<mutex> lock(mMutexMap);
     mBackupReplacedId = -1;
     if(mpReplaced && spMP.find(mpReplaced) != spMP.end())
         mBackupReplacedId = mpReplaced->mnId;
 
+    cout << "clearing backup observations" << endl;
     mBackupObservationsId1.clear();
     mBackupObservationsId2.clear();
     // Save the id and position in each KF who view it
     for(std::map<KeyFrame*,std::tuple<int,int> >::const_iterator it = mObservations.begin(), end = mObservations.end(); it != end; ++it)
     {
+        cout << "saving id and position in each KF" << endl;
+        if (it->first->isBad() || it->first == nullptr) {
+          cout << "1st bad KF" << endl;
+          continue;
+        }
+
+        if (it->second == std::make_tuple(-1,-1)) {
+          cout << "2nd bad KF" << endl;
+          continue;
+        }
         KeyFrame* pKFi = it->first;
+        cout << "pKFi->mnId: " << pKFi->mnId << endl;
         if(spKF.find(pKFi) != spKF.end())
         {
+            cout << "was true" << endl;
             mBackupObservationsId1[it->first->mnId] = get<0>(it->second);
             mBackupObservationsId2[it->first->mnId] = get<1>(it->second);
         }
         else
         {
+            cout << "was false" << endl;
             EraseObservation(pKFi);
         }
     }
 
     // Save the id of the reference KF
+    cout << "saving the id of the reference KF" << endl;
     if(spKF.find(mpRefKF) != spKF.end())
     {
         mBackupRefKFId = mpRefKF->mnId;
@@ -605,6 +621,7 @@ void MapPoint::PostLoad(map<long unsigned int, KeyFrame*>& mpKFid, map<long unsi
     if(!mpRefKF)
     {
         cout << "ERROR: MP without KF reference " << mBackupRefKFId << "; Num obs: " << nObs << endl;
+        return;
     }
     mpReplaced = static_cast<MapPoint*>(NULL);
     if(mBackupReplacedId>=0)

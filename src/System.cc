@@ -168,7 +168,9 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
         loadedAtlas = true;
 
-        mpAtlas->CreateNewMap();
+        // mpAtlas->CreateNewMap();
+        vector<Map*> map_vector = mpAtlas->GetAllMaps();
+        mpAtlas->ChangeMap(map_vector.at(0));
 
         //clock_t timeElapsed = clock() - start;
         //unsigned msElapsed = timeElapsed / (CLOCKS_PER_SEC / 1000);
@@ -237,7 +239,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     }
 
     // Fix verbosity
-    Verbose::SetTh(Verbose::VERBOSITY_QUIET);
+    Verbose::SetTh(Verbose::VERBOSITY_NORMAL);
 
 }
 
@@ -548,7 +550,7 @@ void System::Shutdown()
     if(!mStrSaveAtlasToFile.empty())
     {
         Verbose::PrintMess("Atlas saving to file " + mStrSaveAtlasToFile, Verbose::VERBOSITY_NORMAL);
-        SaveAtlas(FileType::BINARY_FILE);
+        SaveAtlas(FileType::TEXT_FILE);
     }
 
     /*if(mpViewer)
@@ -1546,4 +1548,3 @@ string System::CalculateCheckSum(string filename, int type)
 }
 
 } //namespace ORB_SLAM
-

@@ -26,6 +26,8 @@
 
 #include<mutex>
 #include<chrono>
+#include <string>
+#include <strstream>
 
 namespace ORB_SLAM3
 {
@@ -572,7 +574,7 @@ void LocalMapping::CreateNewMapPoints()
                 cosParallaxStereo2 = cos(2*atan2(pKF2->mb/2,pKF2->mvDepth[idx2]));
 
             if (bStereo1 || bStereo2) totalStereoPts++;
-            
+
             cosParallaxStereo = min(cosParallaxStereo1,cosParallaxStereo2);
 
             Eigen::Vector3f x3D;
@@ -694,7 +696,7 @@ void LocalMapping::CreateNewMapPoints()
             MapPoint* pMP = new MapPoint(x3D, mpCurrentKeyFrame, mpAtlas->GetCurrentMap());
             if (bPointStereo)
                 countStereo++;
-            
+
             pMP->AddObservation(mpCurrentKeyFrame,idx1);
             pMP->AddObservation(pKF2,idx2);
 
@@ -708,7 +710,7 @@ void LocalMapping::CreateNewMapPoints()
             mpAtlas->AddMapPoint(pMP);
             mlpRecentAddedMapPoints.push_back(pMP);
         }
-    }    
+    }
 }
 
 void LocalMapping::SearchInNeighbors()
@@ -1159,7 +1161,7 @@ bool LocalMapping::CheckFinish()
 void LocalMapping::SetFinish()
 {
     unique_lock<mutex> lock(mMutexFinish);
-    mbFinished = true;    
+    mbFinished = true;
     unique_lock<mutex> lock2(mMutexStop);
     mbStopped = true;
 }
@@ -1187,7 +1189,6 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
         minTime = 1.0;
         nMinKF = 10;
     }
-
 
     if(mpAtlas->KeyFramesInMap()<nMinKF)
         return;
@@ -1225,6 +1226,8 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
     // Compute and KF velocities mRwg estimation
     if (!mpCurrentKeyFrame->GetMap()->isImuInitialized())
     {
+        std::stringstream ss;
+
         Eigen::Matrix3f Rwg;
         Eigen::Vector3f dirG;
         dirG.setZero();
@@ -1235,6 +1238,16 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
             if (!(*itKF)->mPrevKF)
                 continue;
 
+
+            // ss << "itKF: " << (*itKF)->mTimeStamp << std::endl;
+            // Verbose::PrintMess(ss.str(), Verbose::VERBOSITY_NORMAL);
+            // ss.str("");
+            // ss << "(*itKF)->mPrevKF->GetImuRotation(): " << (*itKF)->mPrevKF->GetImuRotation() << std::endl;
+            // Verbose::PrintMess(ss.str(), Verbose::VERBOSITY_NORMAL);
+            // ss.str("");
+            // ss << "(*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity(): " << (*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity() << std::endl;
+            // Verbose::PrintMess(ss.str(), Verbose::VERBOSITY_NORMAL);
+            // ss.str("");
             dirG -= (*itKF)->mPrevKF->GetImuRotation() * (*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity();
             Eigen::Vector3f _vel = ((*itKF)->GetImuPosition() - (*itKF)->mPrevKF->GetImuPosition())/(*itKF)->mpImuPreintegrated->dT;
             (*itKF)->SetVelocity(_vel);
@@ -1242,12 +1255,34 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
         }
 
         dirG = dirG/dirG.norm();
+        // ss << "dirG2: " << dirG.transpose() << std::endl;
+        // Verbose::PrintMess(ss.str(), Verbose::VERBOSITY_NORMAL);
+        // ss.str("");
         Eigen::Vector3f gI(0.0f, 0.0f, -1.0f);
+        // ss << "gI: " << gI.transpose() << std::endl;
+        // Verbose::PrintMess(ss.str(), Verbose::VERBOSITY_NORMAL);
+        // ss.str("");
         Eigen::Vector3f v = gI.cross(dirG);
+        // ss << "v: " << v.transpose() << std::endl;
+        // Verbose::PrintMess(ss.str(), Verbose::VERBOSITY_NORMAL);
+        // ss.str("");
         const float nv = v.norm();
+        // ss << "nv: " << nv << std::endl;
+        // Verbose::PrintMess(ss.str(), Verbose::VERBOSITY_NORMAL);
+        // ss.str("");
         const float cosg = gI.dot(dirG);
+        // ss << "cosg: " << cosg << std::endl;
+        // Verbose::PrintMess(ss.str(), Verbose::VERBOSITY_NORMAL);
+        // ss.str("");
         const float ang = acos(cosg);
+        // ss << "ang: " << ang << std::endl;
+        // Verbose::PrintMess(ss.str(), Verbose::VERBOSITY_NORMAL);
+        // ss.str("");
         Eigen::Vector3f vzg = v*ang/nv;
+        // ss << "vzg: " << vzg.transpose() << std::endl;
+        // Verbose::PrintMess(ss.str(), Verbose::VERBOSITY_NORMAL);
+        // ss.str("");
+
         Rwg = Sophus::SO3f::exp(vzg).matrix();
         mRwg = Rwg.cast<double>();
         mTinit = mpCurrentKeyFrame->mTimeStamp-mFirstTs;
@@ -1467,7 +1502,7 @@ void LocalMapping::ScaleRefinement()
         bInitializing=false;
         return;
     }
-    
+
     Sophus::SO3d so3wg(mRwg);
     // Before this line we are not changing the map
     unique_lock<mutex> lock(mpAtlas->GetCurrentMap()->mMutexMapUpdate);

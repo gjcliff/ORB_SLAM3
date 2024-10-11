@@ -582,9 +582,11 @@ void MapPoint::PreSave(set<KeyFrame*>& spKF,set<MapPoint*>& spMP)
     // Save the id and position in each KF who view it
     for(std::map<KeyFrame*,std::tuple<int,int> >::const_iterator it = mObservations.begin(), end = mObservations.end(); it != end; ++it)
     {
-        cout << "saving id and position in each KF" << endl;
+        // cout << "saving id and position in each KF" << endl;
         if (it->first->isBad() || it->first == nullptr) {
           cout << "1st bad KF" << endl;
+          cout << "it->first->mnId: " << it->first->mnId << endl;
+          mObservations.erase(it->first);
           continue;
         }
 
@@ -596,13 +598,11 @@ void MapPoint::PreSave(set<KeyFrame*>& spKF,set<MapPoint*>& spMP)
         cout << "pKFi->mnId: " << pKFi->mnId << endl;
         if(spKF.find(pKFi) != spKF.end())
         {
-            cout << "was true" << endl;
             mBackupObservationsId1[it->first->mnId] = get<0>(it->second);
             mBackupObservationsId2[it->first->mnId] = get<1>(it->second);
         }
         else
         {
-            cout << "was false" << endl;
             EraseObservation(pKFi);
         }
     }
@@ -617,11 +617,13 @@ void MapPoint::PreSave(set<KeyFrame*>& spKF,set<MapPoint*>& spMP)
 
 void MapPoint::PostLoad(map<long unsigned int, KeyFrame*>& mpKFid, map<long unsigned int, MapPoint*>& mpMPid)
 {
+    cout << "mBackupRefKFId: " << mBackupRefKFId << endl;
+    cout << "mpRefKF: " << mpRefKF << endl;
+    cout << "mpKFid.size(): " << mpKFid.size() << endl;
     mpRefKF = mpKFid[mBackupRefKFId];
     if(!mpRefKF)
     {
         cout << "ERROR: MP without KF reference " << mBackupRefKFId << "; Num obs: " << nObs << endl;
-        return;
     }
     mpReplaced = static_cast<MapPoint*>(NULL);
     if(mBackupReplacedId>=0)

@@ -364,7 +364,7 @@ void Map::PreSave(std::set<GeometricCamera*> &spCams)
     for(MapPoint* pMPi : mspMapPoints)
     {
         cout << "MapPoint: " << pMPi->mnId << endl;
-        if(!pMPi || pMPi->isBad())
+        if(!pMPi || pMPi->isBad() || pMPi == nullptr)
             continue;
 
         if(pMPi->GetObservations().size() == 0)
@@ -412,10 +412,10 @@ void Map::PreSave(std::set<GeometricCamera*> &spCams)
             continue;
         }
 
-        cout << "count: " << count << endl;
-        cout << "mvpBackupMapPoints size: " << mvpBackupMapPoints.size() << endl;
-        cout << "mspKeyFrames size: " << mspKeyFrames.size() << endl;
-        cout << "mspMapPoints size: " << mspMapPoints.size() << endl;
+        // cout << "count: " << count << endl;
+        // cout << "mvpBackupMapPoints size: " << mvpBackupMapPoints.size() << endl;
+        // cout << "mspKeyFrames size: " << mspKeyFrames.size() << endl;
+        // cout << "mspMapPoints size: " << mspMapPoints.size() << endl;
         mvpBackupMapPoints.push_back(pMPi);
         pMPi->PreSave(mspKeyFrames,mspMapPoints);
         count++;
@@ -464,8 +464,10 @@ void Map::PostLoad(KeyFrameDatabase* pKFDB, ORBVocabulary* pORBVoc/*, map<long u
     map<long unsigned int,MapPoint*> mpMapPointId;
     for(MapPoint* pMPi : mspMapPoints)
     {
-        if(!pMPi || pMPi->isBad())
-            continue;
+        if(!pMPi || pMPi->isBad() || pMPi == nullptr) {
+          // mspMapPoints.erase(pMPi); // added by graham
+          continue;
+        }
 
         pMPi->UpdateMap(this);
         mpMapPointId[pMPi->mnId] = pMPi;
@@ -474,9 +476,12 @@ void Map::PostLoad(KeyFrameDatabase* pKFDB, ORBVocabulary* pORBVoc/*, map<long u
     map<long unsigned int, KeyFrame*> mpKeyFrameId;
     for(KeyFrame* pKFi : mspKeyFrames)
     {
-        if(!pKFi || pKFi->isBad())
+        if(!pKFi || pKFi->isBad() || pKFi == nullptr)
             continue;
 
+        if (pKFi == 0) {
+          continue;
+        }
         pKFi->UpdateMap(this);
         pKFi->SetORBVocabulary(pORBVoc);
         pKFi->SetKeyFrameDatabase(pKFDB);
@@ -486,7 +491,7 @@ void Map::PostLoad(KeyFrameDatabase* pKFDB, ORBVocabulary* pORBVoc/*, map<long u
     // References reconstruction between different instances
     for(MapPoint* pMPi : mspMapPoints)
     {
-        if(!pMPi || pMPi->isBad())
+        if(!pMPi || pMPi->isBad() || pMPi == nullptr)
             continue;
 
         pMPi->PostLoad(mpKeyFrameId, mpMapPointId);
@@ -494,7 +499,7 @@ void Map::PostLoad(KeyFrameDatabase* pKFDB, ORBVocabulary* pORBVoc/*, map<long u
 
     for(KeyFrame* pKFi : mspKeyFrames)
     {
-        if(!pKFi || pKFi->isBad())
+        if(!pKFi || pKFi->isBad() || pKFi == nullptr)
             continue;
 
         pKFi->PostLoad(mpKeyFrameId, mpMapPointId, mpCams);

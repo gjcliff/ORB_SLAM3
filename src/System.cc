@@ -168,9 +168,9 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
         loadedAtlas = true;
 
-        // mpAtlas->CreateNewMap();
-        vector<Map*> map_vector = mpAtlas->GetAllMaps();
-        mpAtlas->ChangeMap(map_vector.at(0));
+        mpAtlas->CreateNewMap();
+        // vector<Map*> map_vector = mpAtlas->GetAllMaps();
+        // mpAtlas->ChangeMap(map_vector.at(0));
 
         //clock_t timeElapsed = clock() - start;
         //unsigned msElapsed = timeElapsed / (CLOCKS_PER_SEC / 1000);
@@ -550,7 +550,7 @@ void System::Shutdown()
     if(!mStrSaveAtlasToFile.empty())
     {
         Verbose::PrintMess("Atlas saving to file " + mStrSaveAtlasToFile, Verbose::VERBOSITY_NORMAL);
-        SaveAtlas(FileType::TEXT_FILE);
+        SaveAtlas(FileType::BINARY_FILE);
     }
 
     /*if(mpViewer)

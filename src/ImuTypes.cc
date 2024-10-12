@@ -32,7 +32,11 @@ namespace IMU
 const float eps = 1e-4;
 
 Eigen::Matrix3f NormalizeRotation(const Eigen::Matrix3f &R){
+    // std::cout << "R: " << R << std::endl;
     Eigen::JacobiSVD<Eigen::Matrix3f> svd(R, Eigen::ComputeFullU | Eigen::ComputeFullV);
+    // std::cout << "svd.matrixU(): " << svd.matrixU() << std::endl;
+    // std::cout << "svd.matrixV(): " << svd.matrixV() << std::endl;
+    // std::cout << "svd.singularValues(): " << svd.singularValues() << std::endl;
     return svd.matrixU() * svd.matrixV().transpose();
 }
 
@@ -284,7 +288,15 @@ Eigen::Matrix3f Preintegrated::GetDeltaRotation(const Bias &b_)
 {
     std::unique_lock<std::mutex> lock(mMutex);
     Eigen::Vector3f dbg;
+    // std::cout << "dbg: " << dbg << std::endl;
     dbg << b_.bwx-b.bwx,b_.bwy-b.bwy,b_.bwz-b.bwz;
+    // std::cout << "b_.bwx, b.bwx" << b_.bwx << " " << b.bwx << std::endl;
+    // std::cout << "b_.bwy, b.bwy" << b_.bwy << " " << b.bwy << std::endl;
+    // std::cout << "b_.bwz, b.bwz" << b_.bwz << " " << b.bwz << std::endl;
+    // std::cout << "dbg: " << dbg << std::endl;
+    // std::cout << "JRg: " << JRg << std::endl;
+    // std::cout << "dR: " << dR << std::endl;
+    // std::cout << "NormalizeRotation(dR * Sophus::SO3f::exp(JRg * dbg).matrix()): " << NormalizeRotation(dR * Sophus::SO3f::exp(JRg * dbg).matrix()) << std::endl;
     return NormalizeRotation(dR * Sophus::SO3f::exp(JRg * dbg).matrix());
 }
 

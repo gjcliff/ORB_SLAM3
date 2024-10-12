@@ -1745,6 +1745,7 @@ bool Tracking::PredictStateIMU()
 
     if(mbMapUpdated && mpLastKeyFrame)
     {
+        Verbose::PrintMess("IMU prediction!!", Verbose::VERBOSITY_NORMAL);
         const Eigen::Vector3f twb1 = mpLastKeyFrame->GetImuPosition();
         const Eigen::Matrix3f Rwb1 = mpLastKeyFrame->GetImuRotation();
         const Eigen::Vector3f Vwb1 = mpLastKeyFrame->GetVelocity();
@@ -1752,6 +1753,15 @@ bool Tracking::PredictStateIMU()
         const Eigen::Vector3f Gz(0, 0, -IMU::GRAVITY_VALUE);
         const float t12 = mpImuPreintegratedFromLastKF->dT;
 
+        // cout << "t12: " << t12 << endl;
+        // cout << "Gz: " << Gz << endl;
+        // cout << "twb1: " << twb1 << endl;
+        // cout << "Rwb1: " << Rwb1 << endl;
+        // cout << "Vwb1: " << Vwb1 << endl;
+        // cout << "Bias: " << mpLastKeyFrame->GetImuBias() << endl;
+        // cout << "Delta Position: " << mpImuPreintegratedFromLastKF->GetDeltaPosition(mpLastKeyFrame->GetImuBias()).transpose() << endl;
+        // cout << "Delta Velocity: " << mpImuPreintegratedFromLastKF->GetDeltaVelocity(mpLastKeyFrame->GetImuBias()).transpose() << endl;
+        // cout << "Delta Rotation: " << mpImuPreintegratedFromLastKF->GetDeltaRotation(mpLastKeyFrame->GetImuBias()) << endl;
         Eigen::Matrix3f Rwb2 = IMU::NormalizeRotation(Rwb1 * mpImuPreintegratedFromLastKF->GetDeltaRotation(mpLastKeyFrame->GetImuBias()));
         Eigen::Vector3f twb2 = twb1 + Vwb1*t12 + 0.5f*t12*t12*Gz+ Rwb1*mpImuPreintegratedFromLastKF->GetDeltaPosition(mpLastKeyFrame->GetImuBias());
         Eigen::Vector3f Vwb2 = Vwb1 + t12*Gz + Rwb1 * mpImuPreintegratedFromLastKF->GetDeltaVelocity(mpLastKeyFrame->GetImuBias());
@@ -1768,6 +1778,16 @@ bool Tracking::PredictStateIMU()
         const Eigen::Vector3f Vwb1 = mLastFrame.GetVelocity();
         const Eigen::Vector3f Gz(0, 0, -IMU::GRAVITY_VALUE);
         const float t12 = mCurrentFrame.mpImuPreintegratedFrame->dT;
+
+        // cout << "t12: " << t12 << endl;
+        // cout << "Gz: " << Gz << endl;
+        // cout << "twb1: " << twb1 << endl;
+        // cout << "Rwb1: " << Rwb1 << endl;
+        // cout << "Vwb1: " << Vwb1 << endl;
+        // cout << "Bias: " << mLastFrame.mImuBias << endl;
+        // cout << "Delta Position: " << mCurrentFrame.mpImuPreintegratedFrame->GetDeltaPosition(mLastFrame.mImuBias).transpose() << endl;
+        // cout << "Delta Velocity: " << mCurrentFrame.mpImuPreintegratedFrame->GetDeltaVelocity(mLastFrame.mImuBias).transpose() << endl;
+        // cout << "Delta Rotation: " << mCurrentFrame.mpImuPreintegratedFrame->GetDeltaRotation(mLastFrame.mImuBias) << endl;
 
         Eigen::Matrix3f Rwb2 = IMU::NormalizeRotation(Rwb1 * mCurrentFrame.mpImuPreintegratedFrame->GetDeltaRotation(mLastFrame.mImuBias));
         Eigen::Vector3f twb2 = twb1 + Vwb1*t12 + 0.5f*t12*t12*Gz+ Rwb1 * mCurrentFrame.mpImuPreintegratedFrame->GetDeltaPosition(mLastFrame.mImuBias);

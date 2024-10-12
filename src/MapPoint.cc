@@ -586,7 +586,7 @@ void MapPoint::PreSave(set<KeyFrame*>& spKF,set<MapPoint*>& spMP)
         if (it->first->isBad() || it->first == nullptr) {
           cout << "1st bad KF" << endl;
           cout << "it->first->mnId: " << it->first->mnId << endl;
-          mObservations.erase(it->first);
+          // mObservations.erase(it->first);
           continue;
         }
 
@@ -617,10 +617,11 @@ void MapPoint::PreSave(set<KeyFrame*>& spKF,set<MapPoint*>& spMP)
 
 void MapPoint::PostLoad(map<long unsigned int, KeyFrame*>& mpKFid, map<long unsigned int, MapPoint*>& mpMPid)
 {
+    // if (mBackupRefKFId > 1000000) return;
+    mpRefKF = mpKFid[mBackupRefKFId];
     cout << "mBackupRefKFId: " << mBackupRefKFId << endl;
     cout << "mpRefKF: " << mpRefKF << endl;
     cout << "mpKFid.size(): " << mpKFid.size() << endl;
-    mpRefKF = mpKFid[mBackupRefKFId];
     if(!mpRefKF)
     {
         cout << "ERROR: MP without KF reference " << mBackupRefKFId << "; Num obs: " << nObs << endl;

@@ -590,12 +590,15 @@ void KeyFrame::SetBadFlag()
         mit->first->EraseConnection(this);
     }
 
-    for(size_t i=0; i<mvpMapPoints.size(); i++)
     {
+      unique_lock<mutex> lock(mMutexConnections);
+      for(size_t i=0; i<mvpMapPoints.size(); i++)
+      {
         if(mvpMapPoints[i])
         {
-            mvpMapPoints[i]->EraseObservation(this);
+          mvpMapPoints[i]->EraseObservation(this);
         }
+      }
     }
 
     {

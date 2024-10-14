@@ -186,6 +186,10 @@ public:
 
     float GetImageScale();
 
+    // PCL Functions
+    bool SavePCDBinary(std::string path);
+    bool SavePCDASCII(std::string path);
+
 #ifdef REGISTER_TIMES
     void InsertRectTime(double& time);
     void InsertResizeTime(double& time);

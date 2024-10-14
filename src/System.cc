@@ -19,6 +19,7 @@
 
 
 #include "System.h"
+#include "Atlas.h"
 #include "Converter.h"
 #include <thread>
 #include <pangolin/pangolin.h>
@@ -32,6 +33,8 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
+
+#include <pcl/io/pcd_io.h>
 
 namespace ORB_SLAM3
 {
@@ -237,7 +240,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     }
 
     // Fix verbosity
-    Verbose::SetTh(Verbose::VERBOSITY_QUIET);
+    Verbose::SetTh(Verbose::VERBOSITY_NORMAL);
 
 }
 
@@ -1400,6 +1403,73 @@ void System::InsertTrackTime(double& time)
 }
 #endif
 
+bool System::SavePCDBinary(std::string path){
+  pcl::PointCloud<pcl::PointXYZ> cloud;
+  cloud.height = 1;
+  cloud.width = mpAtlas->GetAllMapPoints().size();
+  cloud.is_dense = false;
+  cloud.points.resize(cloud.width * cloud.height);
+
+  std::vector<MapPoint *> atlas = mpAtlas->GetAllMapPoints();
+
+  Verbose::PrintMess("Saving point cloud with " + to_string(atlas.size()) + " points", Verbose::VERBOSITY_NORMAL);
+  for (size_t i = 0; i < cloud.points.size(); i++) {
+    cloud.points.at(i).x = atlas.at(i)->GetWorldPos().x();
+    cloud.points.at(i).y = atlas.at(i)->GetWorldPos().y();
+    cloud.points.at(i).z = atlas.at(i)->GetWorldPos().z();
+  }
+
+  std::time_t now = std::time(nullptr);
+  std::tm *ptm = std::localtime(&now);
+  std::ostringstream oss;
+  oss << path << std::put_time(ptm, "%Y-%m-%d_%H-%M-%S") << ".pcd";
+
+  try {
+    pcl::io::savePCDFileBinary(oss.str(), cloud);
+  } catch (const std::exception &e) {
+    Verbose::PrintMess("Error saving point cloud: " + std::string(e.what()), Verbose::VERBOSITY_NORMAL);
+    return false;
+  }
+
+  Verbose::PrintMess("Saved " + std::to_string(cloud.points.size()) + " points to " + oss.str(), Verbose::VERBOSITY_NORMAL);
+
+  return true;
+}
+
+bool System::SavePCDASCII(std::string path){
+  pcl::PointCloud<pcl::PointXYZ> cloud;
+  cloud.height = 1;
+  cloud.width = mpAtlas->GetAllMapPoints().size();
+  cloud.is_dense = false;
+  cloud.points.resize(cloud.width * cloud.height);
+
+  std::vector<MapPoint *> atlas = mpAtlas->GetAllMapPoints();
+
+  Verbose::PrintMess("Saving point cloud with " + to_string(atlas.size()) + " points", Verbose::VERBOSITY_NORMAL);
+  for (size_t i = 0; i < cloud.points.size(); i++) {
+    cloud.points.at(i).x = atlas.at(i)->GetWorldPos().x();
+    cloud.points.at(i).y = atlas.at(i)->GetWorldPos().y();
+    cloud.points.at(i).z = atlas.at(i)->GetWorldPos().z();
+  }
+
+  std::time_t now = std::time(nullptr);
+  std::tm *ptm = std::localtime(&now);
+  std::ostringstream oss;
+  oss << path << std::put_time(ptm, "%Y-%m-%d_%H-%M-%S") << ".pcd";
+
+  try {
+    pcl::io::savePCDFileASCII(oss.str(), cloud);
+  } catch (const std::exception &e) {
+    Verbose::PrintMess("Error saving point cloud: " + std::string(e.what()), Verbose::VERBOSITY_NORMAL);
+    return false;
+  }
+
+  Verbose::PrintMess("Saved " + std::to_string(cloud.points.size()) + " points to " + oss.str(), Verbose::VERBOSITY_NORMAL);
+
+  return true;
+}
+
+
 void System::SaveAtlas(int type){
     if(!mStrSaveAtlasToFile.empty())
     {
@@ -1546,4 +1616,3 @@ string System::CalculateCheckSum(string filename, int type)
 }
 
 } //namespace ORB_SLAM
-

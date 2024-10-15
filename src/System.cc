@@ -1405,15 +1405,14 @@ void System::InsertTrackTime(double& time)
 
 pcl::PointCloud<pcl::PointXYZ> System::GetMapPCL()
 {
+  unique_lock<mutex> lock(mMutexMap);
   pcl::PointCloud<pcl::PointXYZ> cloud;
+  std::vector<MapPoint*> atlas = mpAtlas->GetAllMapPoints();
   cloud.height = 1;
-  cloud.width = mpAtlas->GetAllMapPoints().size();
+  cloud.width = atlas.size();
   cloud.is_dense = false;
   cloud.points.resize(cloud.width * cloud.height);
 
-  std::vector<MapPoint*> atlas = mpAtlas->GetAllMapPoints();
-
-  Verbose::PrintMess("Saving point cloud with " + to_string(atlas.size()) + " points", Verbose::VERBOSITY_NORMAL);
   for (size_t i = 0; i < cloud.points.size(); i++) {
     cloud.points.at(i).x = atlas.at(i)->GetWorldPos().x();
     cloud.points.at(i).y = atlas.at(i)->GetWorldPos().y();

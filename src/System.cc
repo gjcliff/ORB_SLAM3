@@ -1403,6 +1403,12 @@ void System::InsertTrackTime(double& time)
 }
 #endif
 
+bool System::isImuInitialized()
+{
+  unique_lock<mutex> lock(mMutexImu);
+  return mpAtlas->isImuInitialized();
+}
+
 pcl::PointCloud<pcl::PointXYZ> System::GetMapPCL()
 {
   unique_lock<mutex> lock(mMutexMap);

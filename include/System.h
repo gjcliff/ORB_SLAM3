@@ -189,6 +189,8 @@ public:
 
     pcl::PointCloud<pcl::PointXYZ> GetMapPCL();
 
+    bool isImuInitialized();
+
     // PCL Functions
     bool SavePCDBinary(std::string path);
     bool SavePCDASCII(std::string path);
@@ -261,6 +263,7 @@ private:
     std::vector<MapPoint*> mTrackedMapPoints;
     std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
     std::mutex mMutexState;
+    std::mutex mMutexImu;
     std::mutex mMutexMap;
 
     //

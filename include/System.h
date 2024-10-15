@@ -40,6 +40,7 @@
 #include "ImuTypes.h"
 #include "Settings.h"
 
+#include <pcl/io/pcd_io.h>
 
 namespace ORB_SLAM3
 {
@@ -185,6 +186,8 @@ public:
     void ChangeDataset();
 
     float GetImageScale();
+
+    pcl::PointCloud<pcl::PointXYZ> GetMapPCL();
 
     // PCL Functions
     bool SavePCDBinary(std::string path);

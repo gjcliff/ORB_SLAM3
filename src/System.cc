@@ -1403,6 +1403,25 @@ void System::InsertTrackTime(double& time)
 }
 #endif
 
+pcl::PointCloud<pcl::PointXYZ> System::GetMapPCL()
+{
+  pcl::PointCloud<pcl::PointXYZ> cloud;
+  cloud.height = 1;
+  cloud.width = mpAtlas->GetAllMapPoints().size();
+  cloud.is_dense = false;
+  cloud.points.resize(cloud.width * cloud.height);
+
+  std::vector<MapPoint*> atlas = mpAtlas->GetAllMapPoints();
+
+  Verbose::PrintMess("Saving point cloud with " + to_string(atlas.size()) + " points", Verbose::VERBOSITY_NORMAL);
+  for (size_t i = 0; i < cloud.points.size(); i++) {
+    cloud.points.at(i).x = atlas.at(i)->GetWorldPos().x();
+    cloud.points.at(i).y = atlas.at(i)->GetWorldPos().y();
+    cloud.points.at(i).z = atlas.at(i)->GetWorldPos().z();
+  }
+  return cloud;
+}
+
 bool System::SavePCDBinary(std::string path){
   pcl::PointCloud<pcl::PointXYZ> cloud;
   cloud.height = 1;
@@ -1410,7 +1429,7 @@ bool System::SavePCDBinary(std::string path){
   cloud.is_dense = false;
   cloud.points.resize(cloud.width * cloud.height);
 
-  std::vector<MapPoint *> atlas = mpAtlas->GetAllMapPoints();
+  std::vector<MapPoint*> atlas = mpAtlas->GetAllMapPoints();
 
   Verbose::PrintMess("Saving point cloud with " + to_string(atlas.size()) + " points", Verbose::VERBOSITY_NORMAL);
   for (size_t i = 0; i < cloud.points.size(); i++) {

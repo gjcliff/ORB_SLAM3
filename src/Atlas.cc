@@ -197,7 +197,12 @@ std::vector<KeyFrame*> Atlas::GetAllKeyFrames()
 std::vector<MapPoint*> Atlas::GetAllMapPoints()
 {
     unique_lock<mutex> lock(mMutexAtlas);
-    return mpCurrentMap->GetAllMapPoints();
+    try {
+      return mpCurrentMap->GetAllMapPoints();
+    } catch (const std::exception &e) {
+      std::cerr << "Error getting all map points: " << e.what() << std::endl;
+      return std::vector<MapPoint*>();
+    }
 }
 
 std::vector<MapPoint*> Atlas::GetReferenceMapPoints()

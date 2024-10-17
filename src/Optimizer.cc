@@ -2834,10 +2834,7 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int&
     //cout << "Total map points: " << lLocalMapPoints.size() << endl;
     // for(map<int,int>::iterator mit=mVisEdges.begin(), mend=mVisEdges.end(); mit!=mend; mit++)
     // {
-<<<<<<< HEAD
     //     cout << "mit->second: " << mit->second << endl;
-=======
->>>>>>> orb_slam3_ros2
     //     assert(mit->second>=3);
     // }
 

@@ -1409,6 +1409,25 @@ bool System::isImuInitialized()
   return mpAtlas->isImuInitialized();
 }
 
+pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL()
+{
+  unique_lock<mutex> lock(mMutexState);
+  unique_lock<mutex> lock2(mMutexMap);
+  auto TrackedMapPoints = GetTrackedMapPoints();
+  pcl::PointCloud<pcl::PointXYZ> cloud;
+  cloud.height = 1;
+  cloud.width = TrackedMapPoints.size();
+  cloud.is_dense = false;
+  cloud.points.resize(cloud.width * cloud.height);
+
+  for (size_t i = 0; i < cloud.points.size(); i++) {
+    cloud.points.at(i).x = TrackedMapPoints.at(i)->GetWorldPos().x();
+    cloud.points.at(i).y = TrackedMapPoints.at(i)->GetWorldPos().y();
+    cloud.points.at(i).z = TrackedMapPoints.at(i)->GetWorldPos().z();
+  }
+  return cloud;
+}
+
 pcl::PointCloud<pcl::PointXYZ> System::GetMapPCL()
 {
   unique_lock<mutex> lock(mMutexMap);

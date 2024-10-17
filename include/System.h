@@ -187,6 +187,7 @@ public:
 
     float GetImageScale();
 
+    pcl::PointCloud<pcl::PointXYZ> GetTrackedMapPointsPCL();
     pcl::PointCloud<pcl::PointXYZ> GetMapPCL();
 
     bool isImuInitialized();

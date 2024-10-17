@@ -21,6 +21,7 @@
 #include "System.h"
 #include "Atlas.h"
 #include "Converter.h"
+#include "sophus/types.hpp"
 #include <thread>
 #include <pangolin/pangolin.h>
 #include <iomanip>
@@ -629,6 +630,14 @@ void System::SaveTrajectoryTUM(const string &filename)
     }
     f.close();
     // cout << endl << "trajectory saved!" << endl;
+}
+
+Sophus::SE3f System::GetCurrentPoseImu()
+{
+    unique_lock<mutex> lock(mMutexState);
+    vector<KeyFrame*> vpKFs = mpAtlas->GetAllKeyFrames();
+    sort(vpKFs.begin(),vpKFs.end(),KeyFrame::lId);
+    return vpKFs.back()->GetImuPose();
 }
 
 void System::SaveKeyFrameTrajectoryTUM(const string &filename)
@@ -1413,8 +1422,6 @@ bool System::isImuInitialized()
 
 pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL()
 {
-  unique_lock<mutex> lock(mMutexState);
-  unique_lock<mutex> lock2(mMutexMap);
   auto TrackedMapPoints = GetTrackedMapPoints();
   pcl::PointCloud<pcl::PointXYZ> cloud;
   cloud.height = 1;
@@ -1422,7 +1429,11 @@ pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL()
   cloud.is_dense = false;
   cloud.points.resize(cloud.width * cloud.height);
 
+  unique_lock<mutex> lock(mMutexMap);
   for (size_t i = 0; i < cloud.points.size(); i++) {
+    if (TrackedMapPoints.at(i) == nullptr) {
+      continue;
+    }
     cloud.points.at(i).x = TrackedMapPoints.at(i)->GetWorldPos().x();
     cloud.points.at(i).y = TrackedMapPoints.at(i)->GetWorldPos().y();
     cloud.points.at(i).z = TrackedMapPoints.at(i)->GetWorldPos().z();

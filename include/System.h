@@ -40,6 +40,7 @@
 #include "ImuTypes.h"
 #include "Settings.h"
 
+#include <pcl/io/pcd_io.h>
 
 namespace ORB_SLAM3
 {
@@ -186,6 +187,15 @@ public:
 
     float GetImageScale();
 
+    pcl::PointCloud<pcl::PointXYZ> GetTrackedMapPointsPCL();
+    pcl::PointCloud<pcl::PointXYZ> GetMapPCL();
+
+    bool isImuInitialized();
+
+    // PCL Functions
+    bool SavePCDBinary(std::string path);
+    bool SavePCDASCII(std::string path);
+
 #ifdef REGISTER_TIMES
     void InsertRectTime(double& time);
     void InsertResizeTime(double& time);
@@ -254,6 +264,8 @@ private:
     std::vector<MapPoint*> mTrackedMapPoints;
     std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
     std::mutex mMutexState;
+    std::mutex mMutexImu;
+    std::mutex mMutexMap;
 
     //
     string mStrLoadAtlasFromFile;

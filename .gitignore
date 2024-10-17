@@ -93,3 +93,4 @@ borrar/*
 */ExecMean.txt
 
 .cache
+*.pcd

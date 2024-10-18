@@ -626,8 +626,6 @@ void EdgeInertialGS::computeError()
     const VertexGDir* VGDir = static_cast<const VertexGDir*>(_vertices[6]);
     const VertexScale* VS = static_cast<const VertexScale*>(_vertices[7]);
     const IMU::Bias b(VA->estimate()[0],VA->estimate()[1],VA->estimate()[2],VG->estimate()[0],VG->estimate()[1],VG->estimate()[2]);
-    cout << "bias b: " << b << endl;
-    cout << "bias VA: " << VA->estimate().transpose() << endl;
     g = VGDir->estimate().Rwg*gI;
     const double s = VS->estimate();
     const Eigen::Matrix3d dR = mpInt->GetDeltaRotation(b).cast<double>();

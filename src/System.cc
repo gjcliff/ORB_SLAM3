@@ -637,7 +637,8 @@ Sophus::SE3f System::GetCurrentPoseImu()
     unique_lock<mutex> lock(mMutexState);
     vector<KeyFrame*> vpKFs = mpAtlas->GetAllKeyFrames();
     sort(vpKFs.begin(),vpKFs.end(),KeyFrame::lId);
-    return vpKFs.back()->GetImuPose();
+    auto pose = vpKFs.back()->GetImuPose();
+    return vpKFs.back()->GetPose() * pose;
 }
 
 void System::SaveKeyFrameTrajectoryTUM(const string &filename)

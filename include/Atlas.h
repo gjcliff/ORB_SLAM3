@@ -123,6 +123,9 @@ public:
     void SetImuInitialized();
     bool isImuInitialized();
 
+    bool GetInertialBA1();
+    bool GetInertialBA2();
+
     // Function for garantee the correction of serialization of this object
     void PreSave();
     void PostLoad();

@@ -148,6 +148,7 @@ public:
     void SaveTrajectoryTUM(const string &filename);
 
     Sophus::SE3f GetCurrentPoseImu();
+    std::vector<Sophus::SE3f> GetTcoPoses();
     // Save keyframe poses in the TUM RGB-D dataset format.
     // This method works for all sensor input.
     // Call first Shutdown()
@@ -192,6 +193,8 @@ public:
     pcl::PointCloud<pcl::PointXYZ> GetMapPCL();
 
     bool isImuInitialized();
+    bool GetInertialBA1();
+    bool GetInertialBA2();
 
     // PCL Functions
     bool SavePCDBinary(std::string path);

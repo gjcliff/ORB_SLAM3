@@ -41,4 +41,4 @@ trash-put build
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug
-make -j24
+make -j20

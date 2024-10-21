@@ -641,6 +641,42 @@ Sophus::SE3f System::GetCurrentPoseImu()
     return vpKFs.back()->GetPose() * pose;
 }
 
+std::vector<Sophus::SE3f> System::GetTcoPoses()
+{
+    unique_lock<mutex> lock(mMutexState);
+    vector<KeyFrame*> vpKFs = mpAtlas->GetAllKeyFrames();
+    sort(vpKFs.begin(),vpKFs.end(),KeyFrame::lId);
+    std::vector<Sophus::SE3f> poses;
+    Sophus::SE3f Two = vpKFs[0]->GetPoseInverse();
+    list<ORB_SLAM3::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
+    list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
+    list<bool>::iterator lbL = mpTracker->mlbLost.begin();
+    for(list<Sophus::SE3f>::iterator lit=mpTracker->mlRelativeFramePoses.begin(),
+        lend=mpTracker->mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lT++, lbL++)
+    {
+        if(*lbL)
+            continue;
+
+        KeyFrame* pKF = *lRit;
+
+        Sophus::SE3f Trw;
+
+        // If the reference keyframe was culled, traverse the spanning tree to get a suitable keyframe.
+        while(pKF->isBad())
+        {
+            Trw = Trw * pKF->mTcp;
+            pKF = pKF->GetParent();
+        }
+
+        Trw = Trw * pKF->GetPose() * Two;
+
+        Sophus::SE3f Tcw = (*lit) * Trw;
+        Sophus::SE3f Twc = Tcw.inverse();
+        poses.push_back(System::GetCurrentPoseImu() * Twc);
+    }
+  return poses;
+}
+
 void System::SaveKeyFrameTrajectoryTUM(const string &filename)
 {
     cout << endl << "Saving keyframe trajectory to " << filename << " ..." << endl;
@@ -1419,6 +1455,18 @@ bool System::isImuInitialized()
 {
   unique_lock<mutex> lock(mMutexImu);
   return mpAtlas->isImuInitialized();
+}
+
+bool System::GetInertialBA1()
+{
+  unique_lock<mutex> lock(mMutexImu);
+  return mpAtlas->GetInertialBA1();
+}
+
+bool System::GetInertialBA2()
+{
+  unique_lock<mutex> lock(mMutexImu);
+  return mpAtlas->GetInertialBA2();
 }
 
 pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL()

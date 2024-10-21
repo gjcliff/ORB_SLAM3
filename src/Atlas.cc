@@ -299,6 +299,18 @@ bool Atlas::isImuInitialized()
     return mpCurrentMap->isImuInitialized();
 }
 
+bool Atlas::GetInertialBA1()
+{
+    unique_lock<mutex> lock(mMutexAtlas);
+    return mpCurrentMap->GetIniertialBA1();
+}
+
+bool Atlas::GetInertialBA2()
+{
+    unique_lock<mutex> lock(mMutexAtlas);
+    return mpCurrentMap->GetIniertialBA2();
+}
+
 void Atlas::PreSave()
 {
     if(mpCurrentMap){

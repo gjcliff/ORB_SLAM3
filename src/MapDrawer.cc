@@ -19,6 +19,7 @@
 #include "MapDrawer.h"
 #include "MapPoint.h"
 #include "KeyFrame.h"
+#include <pangolin/gl/gldraw.h>
 #include <pangolin/pangolin.h>
 #include <mutex>
 
@@ -433,6 +434,8 @@ void MapDrawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc)
     glVertex3f(-w,-h,z);
     glVertex3f(w,-h,z);
     glEnd();
+
+    pangolin::glDrawAxis(w*1.5);
 
     glPopMatrix();
 }

@@ -638,65 +638,48 @@ Sophus::SE3f System::GetCurrentPoseImu()
     vector<KeyFrame*> vpKFs = mpAtlas->GetAllKeyFrames();
     sort(vpKFs.begin(),vpKFs.end(),KeyFrame::lId);
     auto pose = vpKFs.back()->GetImuPose();
-    return vpKFs.back()->GetPose() * pose;
+    return pose;
 }
 
-std::vector<Sophus::SE3f> System::GetTcoPoses()
+std::vector<std::shared_ptr<Sophus::SE3f>> System::GetTcoPoses()
 {
     vector<KeyFrame*> vpKFs = mpAtlas->GetAllKeyFrames();
     sort(vpKFs.begin(),vpKFs.end(),KeyFrame::lId);
 
-    std::vector<Sophus::SE3f> poses;
-    for(size_t i=0; i<vpKFs.size(); i++)
+    std::vector<std::shared_ptr<Sophus::SE3f>> poses;
+
+
+    Sophus::SE3f Two = vpKFs[0]->GetPoseInverse();
+    list<ORB_SLAM3::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
+    list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
+    list<bool>::iterator lbL = mpTracker->mlbLost.begin();
+    for(list<Sophus::SE3f>::iterator lit=mpTracker->mlRelativeFramePoses.begin(),
+        lend=mpTracker->mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lT++, lbL++)
     {
-        mMutexState.lock();
-        KeyFrame* pKF = vpKFs[i];
-
-       // pKF->SetPose(pKF->GetPose()*Two);
-
-        if(pKF->isBad())
+        cout << "iteration" << endl;
+        if(*lbL)
             continue;
 
-        cout << "getting pose inverse" << endl;
+        KeyFrame* pKF = *lRit;
+
+        Sophus::SE3f Trw;
+
+        // If the reference keyframe was culled, traverse the spanning tree to get a suitable keyframe.
+        while(pKF->isBad())
+        {
+            Trw = Trw * pKF->mTcp;
+            pKF = pKF->GetParent();
+        }
+
+        Trw = Trw * pKF->GetPose() * Two;
+
+        // Sophus::SE3f Tcw = (*lit) * Trw;
+        // Sophus::SE3f Twc = Tcw.inverse();
         Sophus::SE3f Twc = pKF->GetPoseInverse();
-        cout << "getting quaternion" << endl;
-        Eigen::Quaternionf q = Twc.unit_quaternion();
-        cout << "getting translation" << endl;
-        Eigen::Vector3f t = Twc.translation();
-        cout << "pushing back" << endl;
-        poses.push_back(System::GetCurrentPoseImu() * Twc);
-        mMutexState.unlock();
+        auto Twb = Twc * pKF->GetImuPose();
+        // Twc = Twc * Trw;
+        poses.push_back(std::make_shared<Sophus::SE3f>(Twb));
     }
-
-
-    // Sophus::SE3f Two = vpKFs[0]->GetPoseInverse();
-    // list<ORB_SLAM3::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
-    // list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
-    // list<bool>::iterator lbL = mpTracker->mlbLost.begin();
-    // for(list<Sophus::SE3f>::iterator lit=mpTracker->mlRelativeFramePoses.begin(),
-    //     lend=mpTracker->mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lT++, lbL++)
-    // {
-    //     cout << "iteration" << endl;
-    //     if(*lbL)
-    //         continue;
-    //
-    //     KeyFrame* pKF = *lRit;
-    //
-    //     Sophus::SE3f Trw;
-    //
-    //     // If the reference keyframe was culled, traverse the spanning tree to get a suitable keyframe.
-    //     while(pKF->isBad())
-    //     {
-    //         Trw = Trw * pKF->mTcp;
-    //         pKF = pKF->GetParent();
-    //     }
-    //
-    //     Trw = Trw * pKF->GetPose() * Two;
-    //
-    //     Sophus::SE3f Tcw = (*lit) * Trw;
-    //     Sophus::SE3f Twc = Tcw.inverse();
-    //     poses.push_back(System::GetCurrentPoseImu() * Twc);
-    // }
   return poses;
 }
 

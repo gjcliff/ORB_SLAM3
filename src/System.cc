@@ -1489,11 +1489,21 @@ pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL(Sophus::SE3f Twc)
     if (TrackedMapPoints.at(i) == nullptr) {
       continue;
     }
+    // Eigen::Vector3f world_pos = TrackedMapPoints.at(i)->GetWorldPos();
+    // Eigen::Vector3f relative_pos = world_pos - Twc.translation();
+    // Eigen::Vector3f camera_pos = Twc.rotationMatrix().inverse() * relative_pos;
+    // cout << "Twc.translation(): " << Twc.translation() << endl;
+    // cout << "relative_pos: " << relative_pos << endl;
+    // cout << "camera_pose: " << camera_pos << endl << endl;
+    // cout << "distance from world_pos to Twc.translation(): " << (world_pos - Twc.translation()).norm() << endl;
+    // cout << "distance from camera_pos to Twc.translation(): " << (camera_pos - Twc.translation()).norm() << endl;
+    // cloud.points.at(i).x = camera_pos.x();
+    // cloud.points.at(i).y = camera_pos.y();
+    // cloud.points.at(i).z = camera_pos.z();
+
     cloud.points.at(i).x = TrackedMapPoints.at(i)->GetWorldPos().x() - Twc.translation().x();
-    cloud.points.at(i).y = TrackedMapPoints.at(i)->GetWorldPos().y() - Twc.translation().y();
-    cloud.points.at(i).z = TrackedMapPoints.at(i)->GetWorldPos().z() - Twc.translation().z();
-    // cout << "point before: " << TrackedMapPoints.at(i)->GetWorldPos().transpose() << endl;
-    // cout << "point after: " << cloud.points.at(i).x << " " << cloud.points.at(i).y << " " << cloud.points.at(i).z << endl;
+    cloud.points.at(i).y = -TrackedMapPoints.at(i)->GetWorldPos().y() + Twc.translation().y();
+    cloud.points.at(i).z = -TrackedMapPoints.at(i)->GetWorldPos().z() + Twc.translation().z();
   }
   return cloud;
 }

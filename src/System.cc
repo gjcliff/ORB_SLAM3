@@ -1486,7 +1486,12 @@ pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL(Sophus::SE3f Twc)
 
   unique_lock<mutex> lock(mMutexMap);
   for (size_t i = 0; i < cloud.points.size(); i++) {
+    MapPoint* map_points = TrackedMapPoints.at(i);
     if (TrackedMapPoints.at(i) == nullptr) {
+      continue;
+    } else if (map_points->GetWorldPos().x() < 1e-6 &&
+        map_points->GetWorldPos().y() < 1e-6 &&
+        map_points->GetWorldPos().z() < 1e-6) {
       continue;
     }
     // Eigen::Vector3f world_pos = TrackedMapPoints.at(i)->GetWorldPos();
@@ -1502,8 +1507,8 @@ pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL(Sophus::SE3f Twc)
     // cloud.points.at(i).z = camera_pos.z();
 
     cloud.points.at(i).x = TrackedMapPoints.at(i)->GetWorldPos().x() - Twc.translation().x();
-    cloud.points.at(i).y = -TrackedMapPoints.at(i)->GetWorldPos().y() + Twc.translation().y();
-    cloud.points.at(i).z = -TrackedMapPoints.at(i)->GetWorldPos().z() + Twc.translation().z();
+    cloud.points.at(i).y = TrackedMapPoints.at(i)->GetWorldPos().y() - Twc.translation().y();
+    cloud.points.at(i).z = TrackedMapPoints.at(i)->GetWorldPos().z() - Twc.translation().z();
   }
   return cloud;
 }

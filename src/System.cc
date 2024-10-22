@@ -1475,7 +1475,7 @@ bool System::GetInertialBA2()
   return mpAtlas->GetInertialBA2();
 }
 
-pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL()
+pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL(Sophus::SE3f Twc)
 {
   auto TrackedMapPoints = GetTrackedMapPoints();
   pcl::PointCloud<pcl::PointXYZ> cloud;
@@ -1489,9 +1489,11 @@ pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL()
     if (TrackedMapPoints.at(i) == nullptr) {
       continue;
     }
-    cloud.points.at(i).x = TrackedMapPoints.at(i)->GetWorldPos().x();
-    cloud.points.at(i).y = TrackedMapPoints.at(i)->GetWorldPos().y();
-    cloud.points.at(i).z = TrackedMapPoints.at(i)->GetWorldPos().z();
+    cloud.points.at(i).x = TrackedMapPoints.at(i)->GetWorldPos().x() - Twc.translation().x();
+    cloud.points.at(i).y = TrackedMapPoints.at(i)->GetWorldPos().y() - Twc.translation().y();
+    cloud.points.at(i).z = TrackedMapPoints.at(i)->GetWorldPos().z() - Twc.translation().z();
+    // cout << "point before: " << TrackedMapPoints.at(i)->GetWorldPos().transpose() << endl;
+    // cout << "point after: " << cloud.points.at(i).x << " " << cloud.points.at(i).y << " " << cloud.points.at(i).z << endl;
   }
   return cloud;
 }

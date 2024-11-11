@@ -1475,6 +1475,11 @@ bool System::GetInertialBA2()
   return mpAtlas->GetInertialBA2();
 }
 
+cv::Mat System::getPrettyFrame()
+{
+    return mpFrameDrawer->DrawFrame(mpTracker->GetImageScale());
+}
+
 pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL(Sophus::SE3f Twc)
 {
   auto TrackedMapPoints = GetTrackedMapPoints();

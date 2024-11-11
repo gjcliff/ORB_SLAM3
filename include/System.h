@@ -196,6 +196,8 @@ public:
     bool GetInertialBA1();
     bool GetInertialBA2();
 
+    cv::Mat getPrettyFrame();
+
     // PCL Functions
     bool SavePCDBinary(std::string path);
     bool SavePCDASCII(std::string path);

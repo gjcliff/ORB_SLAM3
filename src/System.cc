@@ -1518,20 +1518,21 @@ pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL(Sophus::SE3f Twc)
   return cloud;
 }
 
-pcl::PointCloud<pcl::PointXYZ> System::GetMapPCL()
+pcl::PointCloud<pcl::PointXYZ>::Ptr System::GetMapPCL()
 {
   unique_lock<mutex> lock(mMutexMap);
-  pcl::PointCloud<pcl::PointXYZ> cloud;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
   std::vector<MapPoint*> atlas = mpAtlas->GetAllMapPoints();
-  cloud.height = 1;
-  cloud.width = atlas.size();
-  cloud.is_dense = false;
-  cloud.points.resize(cloud.width * cloud.height);
+  cloud->height = 1;
+  cloud->width = atlas.size();
+  cloud->is_dense = false;
+  cloud->points.resize(cloud->width * cloud->height);
 
-  for (size_t i = 0; i < cloud.points.size(); i++) {
-    cloud.points.at(i).x = atlas.at(i)->GetWorldPos().x();
-    cloud.points.at(i).y = atlas.at(i)->GetWorldPos().y();
-    cloud.points.at(i).z = atlas.at(i)->GetWorldPos().z();
+  for (size_t i = 0; i < cloud->points.size(); i++) {
+    Eigen::Vector3f worldPos = atlas.at(i)->GetWorldPos();
+    cloud->points.at(i).x = worldPos.x();
+    cloud->points.at(i).y = worldPos.y();
+    cloud->points.at(i).z = worldPos.z();
   }
   return cloud;
 }

@@ -43,7 +43,7 @@ namespace ORB_SLAM3
 Verbose::eLevel Verbose::th = Verbose::VERBOSITY_NORMAL;
 
 System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
-               const bool bUseViewer, const int initFr, const string &strSequence):
+               const bool bUseViewer, const int initFr, const string &strSequence, pcl::PointCloud<pcl::PointXYZ>::Ptr batch_cloud):
     mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mbReset(false), mbResetActiveMap(false),
     mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false), mbShutDown(false)
 {
@@ -133,7 +133,8 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
         //Create the Atlas
         cout << "Initialization of Atlas from scratch " << endl;
-        mpAtlas = new Atlas(0);
+        mpAtlas = new Atlas(0, batch_cloud);
+        // mpAtlas = new Atlas(0);
     }
     else
     {
@@ -199,7 +200,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     //Initialize the Local Mapping thread and launch
     mpLocalMapper = new LocalMapping(this, mpAtlas, mSensor==MONOCULAR || mSensor==IMU_MONOCULAR,
-                                     mSensor==IMU_MONOCULAR || mSensor==IMU_STEREO || mSensor==IMU_RGBD, strSequence);
+                                      mSensor==IMU_MONOCULAR || mSensor==IMU_STEREO || mSensor==IMU_RGBD, strSequence);
     mptLocalMapping = new thread(&ORB_SLAM3::LocalMapping::Run,mpLocalMapper);
     mpLocalMapper->mInitFr = initFr;
     if(settings_)

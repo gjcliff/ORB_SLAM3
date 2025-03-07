@@ -1461,19 +1461,22 @@ void System::InsertTrackTime(double& time)
 bool System::isImuInitialized()
 {
   unique_lock<mutex> lock(mMutexImu);
-  return mpAtlas->isImuInitialized();
+  bool imuInit = mpAtlas->isImuInitialized();
+  return imuInit;
 }
 
 bool System::GetInertialBA1()
 {
   unique_lock<mutex> lock(mMutexImu);
-  return mpAtlas->GetInertialBA1();
+  bool ba1Init = mpAtlas->GetInertialBA1();
+  return ba1Init;
 }
 
 bool System::GetInertialBA2()
 {
   unique_lock<mutex> lock(mMutexImu);
-  return mpAtlas->GetInertialBA2();
+  bool ba2Init = mpAtlas->GetInertialBA2();
+  return ba2Init;
 }
 
 cv::Mat System::getPrettyFrame()

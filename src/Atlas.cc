@@ -299,19 +299,22 @@ void Atlas::SetImuInitialized()
 bool Atlas::isImuInitialized()
 {
   unique_lock<mutex> lock(mMutexAtlas);
-  return mpCurrentMap->isImuInitialized();
+  bool imuInit = mpCurrentMap->isImuInitialized();
+  return imuInit;
 }
 
 bool Atlas::GetInertialBA1()
 {
   unique_lock<mutex> lock(mMutexAtlas);
-  return mpCurrentMap->GetIniertialBA1();
+  bool ba1Init = mpCurrentMap->GetIniertialBA1();
+  return ba1Init;
 }
 
 bool Atlas::GetInertialBA2()
 {
   unique_lock<mutex> lock(mMutexAtlas);
-  return mpCurrentMap->GetIniertialBA2();
+  bool ba2Init = mpCurrentMap->GetIniertialBA2();
+  return ba2Init;
 }
 
 void Atlas::PreSave()

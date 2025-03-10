@@ -37,15 +37,6 @@ Atlas::Atlas(int initKFid) : mnLastInitKFidMap(initKFid), mHasViewer(false)
   CreateNewMap();
 }
 
-Atlas::Atlas(int initKFid, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
-  : mnLastInitKFidMap(initKFid), mHasViewer(false)
-{
-  mpCurrentMap = static_cast<Map *>(NULL);
-  CreateNewMap();
-
-  batch_cloud = cloud;
-}
-
 Atlas::~Atlas()
 {
   for (std::set<Map *>::iterator it = mspMaps.begin(), end = mspMaps.end();
@@ -116,12 +107,8 @@ void Atlas::AddKeyFrame(KeyFrame *pKF)
 
 void Atlas::AddMapPoint(MapPoint *pMP)
 {
-  Eigen::Vector3f point = pMP->GetWorldPos();
-  batch_cloud->push_back(pcl::PointXYZ(point.x(), point.y(), point.z()));
-
   Map *pMapMP = pMP->GetMap();
   pMapMP->AddMapPoint(pMP);
-
 }
 
 GeometricCamera *Atlas::AddCamera(GeometricCamera *pCam)
@@ -201,6 +188,12 @@ std::vector<MapPoint *> Atlas::GetAllMapPoints()
 {
   unique_lock<mutex> lock(mMutexAtlas);
   return mpCurrentMap->GetAllMapPoints();
+}
+
+std::set<MapPoint *> Atlas::GetAllMapPointsSet()
+{
+  unique_lock<mutex> lock(mMutexAtlas);
+  return mpCurrentMap->GetAllMapPointsSet();
 }
 
 std::vector<MapPoint *> Atlas::GetReferenceMapPoints()

@@ -40,6 +40,9 @@
 #include "ImuTypes.h"
 #include "Settings.h"
 
+#include <pcl/pcl_base.h>
+#include <pcl/impl/point_types.hpp>
+
 #include <pcl/io/pcd_io.h>
 
 namespace ORB_SLAM3
@@ -103,7 +106,7 @@ public:
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
-    System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true, const int initFr = 0, const string &strSequence = std::string(), pcl::PointCloud<pcl::PointXYZ>::Ptr batch_cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZ>>());
+    System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true, const int initFr = 0, const string &strSequence = std::string());
 
     // Proccess the given stereo frame. Images must be synchronized and rectified.
     // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
@@ -179,6 +182,7 @@ public:
     int GetTrackingState();
     std::vector<MapPoint*> GetTrackedMapPoints();
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
+    std::set<MapPoint *> GetAllMapPointsSet();
 
     // For debugging
     double GetTimeFromIMUInit();

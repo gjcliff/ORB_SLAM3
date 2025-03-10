@@ -43,7 +43,7 @@ namespace ORB_SLAM3
 Verbose::eLevel Verbose::th = Verbose::VERBOSITY_NORMAL;
 
 System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
-               const bool bUseViewer, const int initFr, const string &strSequence, pcl::PointCloud<pcl::PointXYZ>::Ptr batch_cloud):
+               const bool bUseViewer, const int initFr, const string &strSequence):
     mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mbReset(false), mbResetActiveMap(false),
     mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false), mbShutDown(false)
 {
@@ -133,7 +133,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
         //Create the Atlas
         cout << "Initialization of Atlas from scratch " << endl;
-        mpAtlas = new Atlas(0, batch_cloud);
+        mpAtlas = new Atlas(0);
         // mpAtlas = new Atlas(0);
     }
     else
@@ -1486,6 +1486,7 @@ cv::Mat System::getPrettyFrame()
 
 pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL(Sophus::SE3f Twc)
 {
+  unique_lock<mutex> lock(mMutexMap);
   auto TrackedMapPoints = GetTrackedMapPoints();
   pcl::PointCloud<pcl::PointXYZ> cloud;
   cloud.height = 1;
@@ -1493,10 +1494,9 @@ pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL(Sophus::SE3f Twc)
   cloud.is_dense = false;
   cloud.points.resize(cloud.width * cloud.height);
 
-  unique_lock<mutex> lock(mMutexMap);
-  for (size_t i = 0; i < cloud.points.size(); i++) {
+  for (size_t i = 0; i < TrackedMapPoints.size(); i++) {
     MapPoint* map_points = TrackedMapPoints.at(i);
-    if (TrackedMapPoints.at(i) == nullptr) {
+    if (map_points == nullptr) {
       continue;
     } else if (map_points->GetWorldPos().x() < 1e-6 &&
         map_points->GetWorldPos().y() < 1e-6 &&
@@ -1522,21 +1522,29 @@ pcl::PointCloud<pcl::PointXYZ> System::GetTrackedMapPointsPCL(Sophus::SE3f Twc)
   return cloud;
 }
 
+std::set<MapPoint *> System::GetAllMapPointsSet()
+{
+  return mpAtlas->GetAllMapPointsSet();
+}
+
 pcl::PointCloud<pcl::PointXYZ> System::GetMapPCL()
 {
   unique_lock<mutex> lock(mMutexMap);
   pcl::PointCloud<pcl::PointXYZ> cloud;
-  std::vector<MapPoint*> atlas = mpAtlas->GetAllMapPoints();
+  std::set<MapPoint*> atlas = mpAtlas->GetAllMapPointsSet();
   cloud.height = 1;
   cloud.width = atlas.size();
-  cloud.is_dense = false;
+  cloud.is_dense = true;
   cloud.points.resize(cloud.width * cloud.height);
 
-  for (size_t i = 0; i < cloud.points.size(); i++) {
-    cloud.points.at(i).x = atlas.at(i)->GetWorldPos().x();
-    cloud.points.at(i).y = atlas.at(i)->GetWorldPos().y();
-    cloud.points.at(i).z = atlas.at(i)->GetWorldPos().z();
+  int i = 0;
+  for (const auto &point : atlas) {
+    cloud.points.at(i).x = point->GetWorldPos().x();
+    cloud.points.at(i).y = point->GetWorldPos().y();
+    cloud.points.at(i).z = point->GetWorldPos().z();
+    i++;
   }
+
   return cloud;
 }
 
@@ -1547,13 +1555,15 @@ bool System::SavePCDBinary(std::string path){
   cloud.is_dense = false;
   cloud.points.resize(cloud.width * cloud.height);
 
-  std::vector<MapPoint*> atlas = mpAtlas->GetAllMapPoints();
+  std::set<MapPoint*> atlas = mpAtlas->GetAllMapPointsSet();
 
   Verbose::PrintMess("Saving point cloud with " + to_string(atlas.size()) + " points", Verbose::VERBOSITY_NORMAL);
-  for (size_t i = 0; i < cloud.points.size(); i++) {
-    cloud.points.at(i).x = atlas.at(i)->GetWorldPos().x();
-    cloud.points.at(i).y = atlas.at(i)->GetWorldPos().y();
-    cloud.points.at(i).z = atlas.at(i)->GetWorldPos().z();
+  int i = 0;
+  for (const auto &point : atlas) {
+    cloud.points.at(i).x = point->GetWorldPos().x();
+    cloud.points.at(i).y = point->GetWorldPos().y();
+    cloud.points.at(i).z = point->GetWorldPos().z();
+    i++;
   }
 
   std::time_t now = std::time(nullptr);
@@ -1580,13 +1590,15 @@ bool System::SavePCDASCII(std::string path){
   cloud.is_dense = false;
   cloud.points.resize(cloud.width * cloud.height);
 
-  std::vector<MapPoint *> atlas = mpAtlas->GetAllMapPoints();
+  std::set<MapPoint *> atlas = mpAtlas->GetAllMapPointsSet();
 
   Verbose::PrintMess("Saving point cloud with " + to_string(atlas.size()) + " points", Verbose::VERBOSITY_NORMAL);
-  for (size_t i = 0; i < cloud.points.size(); i++) {
-    cloud.points.at(i).x = atlas.at(i)->GetWorldPos().x();
-    cloud.points.at(i).y = atlas.at(i)->GetWorldPos().y();
-    cloud.points.at(i).z = atlas.at(i)->GetWorldPos().z();
+  int i = 0;
+  for (const auto &point : atlas) {
+    cloud.points.at(i).x = point->GetWorldPos().x();
+    cloud.points.at(i).y = point->GetWorldPos().y();
+    cloud.points.at(i).z = point->GetWorldPos().z();
+    i++;
   }
 
   std::time_t now = std::time(nullptr);

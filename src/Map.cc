@@ -156,6 +156,12 @@ vector<MapPoint*> Map::GetAllMapPoints()
     return vector<MapPoint*>(mspMapPoints.begin(),mspMapPoints.end());
 }
 
+set<MapPoint*> Map::GetAllMapPointsSet()
+{
+    unique_lock<mutex> lock(mMutexMap);
+    return mspMapPoints;
+}
+
 long unsigned int Map::MapPointsInMap()
 {
     unique_lock<mutex> lock(mMutexMap);

@@ -83,6 +83,7 @@ public:
 
     std::vector<KeyFrame*> GetAllKeyFrames();
     std::vector<MapPoint*> GetAllMapPoints();
+    std::set<MapPoint*> GetAllMapPointsSet();
     std::vector<MapPoint*> GetReferenceMapPoints();
 
     long unsigned int MapPointsInMap();

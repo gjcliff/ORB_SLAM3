@@ -34,9 +34,6 @@
 #include <mutex>
 #include <set>
 
-#include <pcl/point_cloud.h>
-#include <pcl/impl/point_types.hpp>
-
 namespace ORB_SLAM3 {
 class Viewer;
 class Map;
@@ -78,7 +75,6 @@ public:
 
   Atlas();
   Atlas(int initKFid); // When its initialization the first map is created
-  Atlas(int initKFid, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 
   ~Atlas();
 
@@ -109,6 +105,7 @@ public:
   // Method for get data in current map
   std::vector<KeyFrame *> GetAllKeyFrames();
   std::vector<MapPoint *> GetAllMapPoints();
+  std::set<MapPoint *> GetAllMapPointsSet();
   std::vector<MapPoint *> GetReferenceMapPoints();
 
   vector<Map *> GetAllMaps();
@@ -170,8 +167,6 @@ protected:
 
   // Mutex
   std::mutex mMutexAtlas;
-
-  pcl::PointCloud<pcl::PointXYZ>::Ptr batch_cloud;
 
 }; // class Atlas
 

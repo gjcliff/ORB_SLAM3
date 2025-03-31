@@ -105,6 +105,7 @@ public:
   // Method for get data in current map
   std::vector<KeyFrame *> GetAllKeyFrames();
   std::vector<MapPoint *> GetAllMapPoints();
+  std::set<MapPoint *> GetAllValidMapPoints();
   std::set<MapPoint *> GetAllMapPointsSet();
   std::vector<MapPoint *> GetReferenceMapPoints();
 

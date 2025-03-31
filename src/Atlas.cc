@@ -190,6 +190,17 @@ std::vector<MapPoint *> Atlas::GetAllMapPoints()
   return mpCurrentMap->GetAllMapPoints();
 }
 
+std::set<MapPoint *> Atlas::GetAllValidMapPoints()
+{
+  std::set<MapPoint *> result;
+  unique_lock<mutex> lock(mMutexAtlas);
+  for (MapPoint *pMP : mpCurrentMap->GetAllMapPoints()) {
+    if (pMP && !pMP->isBad())
+      result.insert(pMP);
+  }
+  return result;
+}
+
 std::set<MapPoint *> Atlas::GetAllMapPointsSet()
 {
   unique_lock<mutex> lock(mMutexAtlas);

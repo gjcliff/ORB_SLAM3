@@ -1548,6 +1548,11 @@ pcl::PointCloud<pcl::PointXYZ> System::GetMapPCL()
   return cloud;
 }
 
+std::set<MapPoint *> System::GetAllValidMapPoints()
+{
+  return mpAtlas->GetAllValidMapPoints();
+}
+
 bool System::SavePCDBinary(std::string path){
   pcl::PointCloud<pcl::PointXYZ> cloud;
   cloud.height = 1;

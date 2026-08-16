@@ -1,7 +1,6 @@
 echo "Configuring and building Thirdparty/DBoW2 ..."
 
 cd Thirdparty/DBoW2
-trash-put build
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug
@@ -35,7 +34,6 @@ cd ..
 
 echo "Configuring and building ORB_SLAM3 ..."
 
-trash-put build
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug

@@ -139,6 +139,21 @@ if(realsense2_FOUND)
     )
 endif()
 
+# --- Export ORB_SLAM3 as a CMake package ------------------------------------
+# Lets other CMake projects (e.g. orb_slam3_ros2) consume this library with
+# find_package(ORB_SLAM3 CONFIG) + target_link_libraries(... ORB_SLAM3::ORB_SLAM3)
+# instead of locating build.sh's output files by hand.
+target_include_directories(${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/CameraModels>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/Thirdparty/Sophus>
+)
+
+export(TARGETS ${PROJECT_NAME}
+    NAMESPACE ORB_SLAM3::
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/ORB_SLAM3Config.cmake
+)
+
 
 # Build examples
 

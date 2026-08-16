@@ -1386,6 +1386,11 @@ float System::GetImageScale()
     return mpTracker->GetImageScale();
 }
 
+cv::Mat System::GetFrameDrawerImage()
+{
+    return mpFrameDrawer->DrawFrame();
+}
+
 #ifdef REGISTER_TIMES
 void System::InsertRectTime(double& time)
 {

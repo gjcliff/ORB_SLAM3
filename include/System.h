@@ -186,6 +186,7 @@ public:
     void ChangeDataset();
 
     float GetImageScale();
+    cv::Mat GetFrameDrawerImage();
 
     pcl::PointCloud<pcl::PointXYZ> GetMapPCL();
 

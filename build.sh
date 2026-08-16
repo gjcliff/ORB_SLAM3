@@ -24,7 +24,11 @@ echo "Configuring and building Thirdparty/Sophus ..."
 trash-put build
 mkdir build
 cd build
+<<<<<<< Updated upstream
 cmake .. -DCMAKE_BUILD_TYPE=Debug
+=======
+cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+>>>>>>> Stashed changes
 make -j
 
 cd ../../../
